@@ -1,0 +1,13 @@
+{
+    "methods": [
+      "Cards",
+      "Cards Recurring",
+      "UPI/QR",
+      "UPI Autopay",
+      "Net Banking",
+      "Emandate",
+      "BNPL & Cardless",
+      "Smart Collect"
+    ]
+}
+  
