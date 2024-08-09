@@ -1,53 +1,20 @@
-import pandas as pd
 import streamlit as st
 import time
-import json
-
-@st.cache_data
-def load_full_data():
-    """Load and cache the entire dataset."""
-    file_path = 'Ready Reckoner Feature X Vertical - Aug 2023  - Method Features.csv'
-    return pd.read_csv(file_path)
-
-def load_json_data(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-    return data
-
-def filter_data(checkout_type, vertical_name, methods_of_choice, df):
-    df['Method'] = df['Method'].ffill()
-
-    selected_checkout = checkout_type
-    selected_vertical = vertical_name
-    methods_of_choice = [method.strip() for method in methods_of_choice]
-
-    filtered_df = df[df['Method'].isin(methods_of_choice)]
-    relevant_columns = ['Method', 'Name of the  Feature', 'Availability', selected_checkout, selected_vertical]
-
-    missing_columns = [col for col in relevant_columns if col not in df.columns]
-    if missing_columns:
-        st.error(f"Error accessing columns: Missing columns {missing_columns}")
-        return None
-
-    filtered_df = filtered_df[relevant_columns]
-    filtered_df['Implementation Status'] = 'Select'
-    
-    return filtered_df
+from redefine_reckoner.utils.database import load_full_data, save_to_database, load_from_database
+from redefine_reckoner.utils.data_processing import filter_data, load_static_data
 
 def main():
     st.set_page_config(page_title="Redefine Ready Reckoner", layout="wide")
     
     if 'filtered_df' not in st.session_state:
-        st.session_state.filtered_df = None
+        st.session_state.filtered_df = load_from_database()
     if 'show_success' not in st.session_state:
         st.session_state.show_success = False
 
     full_df = load_full_data()
 
     # Load static data from JSON files
-    checkout_data = load_json_data('data/checkout_types.json')
-    vertical_data = load_json_data('data/vertical_names.json')
-    methods_data = load_json_data('data/methods.json')
+    checkout_data, vertical_data, methods_data = load_static_data()
 
     st.sidebar.title("Navigation")
     option = st.sidebar.radio("Select a Page", ["Home", "View Ready Reckoner"])
@@ -116,6 +83,7 @@ def main():
 
             if st.button("Save Changes", type="primary"):
                 st.session_state.filtered_df = edited_df.copy()
+                save_to_database(st.session_state.filtered_df)
                 st.session_state.show_success = True
 
         if st.session_state.show_success:
