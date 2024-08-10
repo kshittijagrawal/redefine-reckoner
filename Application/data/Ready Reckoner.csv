@@ -1,4 +1,4 @@
-Method,Name of the  Feature,Availability,Standard,Custom,S2S,Lending,Ecommerce,Travel,Gaming,Investments,DMT,Insurance,OTT,Government,Cross Borders - Export Flow,Cross Borders - Import Flow
+Method,Name of the Feature,Availability,Standard,Custom,S2S,Lending,Ecommerce,Travel,Gaming,Investments,DMT,Insurance,OTT,Government,Cross Borders - Export Flow,Cross Borders - Import Flow
 Cards,Dynamic routing,Feature Request,No Merchant Effort,No Merchant Effort,No Merchant Effort,Must have,Must have,Must have,Must have,Limited Usecase,Must have,Must have,Must have,Must have,Product Limitation,Product Limitation
 ,>= 2 Terminals ,Internal request,No Merchant Effort,No Merchant Effort,No Merchant Effort,Must have,Must have,Must have,Must have,Limited Usecase,Must have,Must have,Must have,Must have,Product Limitation,Product Limitation
 ,Native OTP,Feature Request,No Merchant Effort,Merchant Effort Required,Merchant Effort Required,Must have,Must have,Must have,Must have,Limited Usecase,Must have,Must have,Must have,Must have,Must have,Must have
