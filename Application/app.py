@@ -39,13 +39,11 @@ def get_data_from_db(db_path, query):
 
 def filter_data(checkout_type, vertical_name, methods_of_choice, df):
     df['Method'] = df['Method'].ffill()
-
-    selected_checkout = checkout_type
-    selected_vertical = vertical_name
+    
     methods_of_choice = [method.strip() for method in methods_of_choice]
 
     filtered_df = df[df['Method'].isin(methods_of_choice)]
-    relevant_columns = ['Method', 'Name of the Feature', 'Availability', selected_checkout, selected_vertical]
+    relevant_columns = ['Method', 'Name_of_the_Feature', 'Availability', checkout_type, vertical_name]
 
     missing_columns = [col for col in relevant_columns if col not in df.columns]
     if missing_columns:
@@ -58,6 +56,22 @@ def filter_data(checkout_type, vertical_name, methods_of_choice, df):
 
     return filtered_df
 
+def get_feature_flags(db_path, reckoner_id):
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT flags, description FROM features WHERE reckoner_id = ?", (reckoner_id,))
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            flags = json.loads(result[0])
+            description = result[1]
+            return flags, description
+        return None, None
+    except Exception as e:
+        st.error(f"An error occurred while fetching feature flags: {str(e)}")
+        return None, None
+
 def main():
     st.set_page_config(page_title="Redefine Ready Reckoner", layout="wide")
     
@@ -68,7 +82,7 @@ def main():
 
     # Load full dataset from the database
     db_path = "data/redefine_reckoner.db"
-    full_df = get_data_from_db(db_path, "SELECT * FROM features")
+    full_df = get_data_from_db(db_path, "SELECT * FROM reckoner")
 
     # Load static data from JSON files
     checkout_data = load_json_data('data/checkout_types.json')
@@ -108,6 +122,10 @@ def main():
                     help='Choose the implementation status for each feature.',
                     width='medium',
                     required=True
+                ),
+                'Availability': st.column_config.Column(
+                    width='medium',
+                    help='Click on "Feature Request" to view details'
                 )
             }
             
@@ -122,6 +140,20 @@ def main():
                 hide_index=True,
                 key="data_editor"
             )
+
+            # Handle feature request clicks
+            for index, row in edited_df.iterrows():
+                if row['Availability'] == 'Feature Request':
+                    if st.button(f"View Feature Flags: {row['Name_of_the_Feature']}", key=f"feature_{index}"):
+                        flags, description = get_feature_flags(db_path, index)
+                        if flags and description:
+                            st.info(f"Feature: {row['Name_of_the_Feature']}")
+                            st.write(f"Description: {description}")
+                            st.write("Feature Flags:")
+                            for flag in flags:
+                                st.write(f"- {flag}")
+                        else:
+                            st.warning("No feature flags found for this feature request.")
 
             if st.button("Save Changes", type="primary"):
                 st.session_state.filtered_df = edited_df.copy()
