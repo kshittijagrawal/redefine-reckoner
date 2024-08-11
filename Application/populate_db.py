@@ -10,27 +10,20 @@ def create_connection(db_path):
         print(f"Error connecting to database: {e}")
         return None
 
-def create_table(conn):
-    try:
-        conn.execute('''
-        CREATE TABLE IF NOT EXISTS features (
-            Method TEXT,
-            Name_of_the_Feature TEXT,
-            Availability TEXT,
-            Checkout_Type TEXT,
-            Vertical_Name TEXT,
-            Implementation_Status TEXT
-        );
-        ''')
-        conn.commit()
-    except sqlite3.Error as e:
-        print(f"Error creating table: {e}")
-
-def populate_table(conn, df):
+def populate_table_from_csv(conn, df):
     try:
         df.to_sql('features', conn, if_exists='replace', index=False)
+        print("Table 'features' created and populated successfully.")
     except sqlite3.Error as e:
-        print(f"Error populating table: {e}")
+        print(f"Error creating and populating table: {e}")
+
+def print_table_info(conn):
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(features)")
+    columns = cursor.fetchall()
+    print("\nTable structure:")
+    for column in columns:
+        print(f"Column: {column[1]}, Type: {column[2]}")
 
 def main():
     db_path = "data/redefine_reckoner.db"
@@ -44,6 +37,7 @@ def main():
     # Read CSV file into DataFrame
     try:
         df = pd.read_csv(csv_file_path)
+        print(f"CSV file read successfully. Columns: {', '.join(df.columns)}")
     except FileNotFoundError:
         print(f"File not found: {csv_file_path}")
         return
@@ -59,13 +53,14 @@ def main():
     if conn is None:
         return
 
-    # Create the table
-    create_table(conn)
+    # Create and populate the table with data from CSV
+    populate_table_from_csv(conn, df)
 
-    # Populate the table with data
-    populate_table(conn, df)
+    # Print table information
+    print_table_info(conn)
 
-    print("Database population complete.")
+    conn.close()
+    print("\nDatabase population complete.")
 
 if __name__ == "__main__":
     main()
