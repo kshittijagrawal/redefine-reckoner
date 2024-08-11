@@ -3,24 +3,8 @@ import pandas as pd
 import streamlit as st
 import time
 import json
-import os
 
 @st.cache_data
-def load_json_data(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-        return data
-    except FileNotFoundError:
-        st.error(f"JSON file not found: {file_path}")
-        return None
-    except json.JSONDecodeError:
-        st.error(f"Error decoding JSON file: {file_path}")
-        return None
-    except Exception as e:
-        st.error(f"An unexpected error occurred while loading JSON: {str(e)}")
-        return None
-
 def get_data_from_db(db_path, query):
     try:
         conn = sqlite3.connect(db_path)
@@ -43,7 +27,7 @@ def filter_data(checkout_type, vertical_name, methods_of_choice, df):
     methods_of_choice = [method.strip() for method in methods_of_choice]
 
     filtered_df = df[df['Method'].isin(methods_of_choice)]
-    relevant_columns = ['Method', 'Name_of_the_Feature', 'Availability', checkout_type, vertical_name]
+    relevant_columns = ['id', 'Method', 'Name_of_the_Feature', 'Availability', checkout_type, vertical_name]
 
     missing_columns = [col for col in relevant_columns if col not in df.columns]
     if missing_columns:
@@ -63,6 +47,7 @@ def get_feature_flags(db_path, reckoner_id):
         cursor.execute("SELECT flags, description FROM features WHERE reckoner_id = ?", (reckoner_id,))
         result = cursor.fetchone()
         conn.close()
+        
         if result:
             flags = json.loads(result[0])
             description = result[1]
@@ -84,10 +69,18 @@ def main():
     db_path = "data/redefine_reckoner.db"
     full_df = get_data_from_db(db_path, "SELECT * FROM reckoner")
 
-    # Load static data from JSON files
-    checkout_data = load_json_data('data/checkout_types.json')
-    vertical_data = load_json_data('data/vertical_names.json')
-    methods_data = load_json_data('data/methods.json')
+    # Load static data from database tables
+    checkout_types_df = get_data_from_db(db_path, "SELECT checkout FROM checkout_types")
+    vertical_names_df = get_data_from_db(db_path, "SELECT vertical FROM vertical_names")
+    methods_df = get_data_from_db(db_path, "SELECT method FROM methods")
+
+    if checkout_types_df is not None and vertical_names_df is not None and methods_df is not None:
+        checkout_data = checkout_types_df['checkout'].tolist()
+        vertical_data = vertical_names_df['vertical'].tolist()
+        methods_data = methods_df['method'].tolist()
+    else:
+        st.error("Failed to load static data from the database.")
+        return
 
     st.sidebar.title("Navigation")
     option = st.sidebar.radio("Select a Page", ["Home", "View Ready Reckoner"])
@@ -98,11 +91,11 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            checkout_type = st.selectbox("Select Checkout Type:", checkout_data["checkout_types"])
-            vertical_name = st.selectbox("Select Vertical Name:", vertical_data["vertical_names"])
+            checkout_type = st.selectbox("Select Checkout Type:", checkout_data)
+            vertical_name = st.selectbox("Select Vertical Name:", vertical_data)
         
         with col2:
-            methods_of_choice = st.multiselect("Select Methods of Choice:", methods_data["methods"])
+            methods_of_choice = st.multiselect("Select Methods of Choice:", methods_data)
 
         if st.button("Filter Data", type="primary"):
             if methods_of_choice:
@@ -125,7 +118,7 @@ def main():
                 ),
                 'Availability': st.column_config.Column(
                     width='medium',
-                    help='Click on "Feature Request" to view details'
+                    help='See "Feature Requests" section for details'
                 )
             }
             
@@ -141,19 +134,31 @@ def main():
                 key="data_editor"
             )
 
-            # Handle feature request clicks
-            for index, row in edited_df.iterrows():
-                if row['Availability'] == 'Feature Request':
-                    if st.button(f"View Feature Flags: {row['Name_of_the_Feature']}", key=f"feature_{index}"):
-                        flags, description = get_feature_flags(db_path, index)
-                        if flags and description:
-                            st.info(f"Feature: {row['Name_of_the_Feature']}")
-                            st.write(f"Description: {description}")
-                            st.write("Feature Flags:")
-                            for flag in flags:
-                                st.write(f"- {flag}")
-                        else:
-                            st.warning("No feature flags found for this feature request.")
+            # Feature Requests section
+            st.subheader("\nFeature Requests aligned with the Reckoner")
+
+            feature_requests = edited_df[edited_df['Availability'] == 'Feature Request']
+
+            if not feature_requests.empty:
+                # Group feature requests by Method
+                grouped_requests = feature_requests.groupby('Method')
+                
+                for method, group in grouped_requests:
+                    with st.expander(f"{method}"):
+                        for index, row in group.iterrows():
+                            st.markdown(f"#### {row['Name_of_the_Feature']}")
+                            reckoner_id = row['id']
+                            flags, description = get_feature_flags(db_path, reckoner_id)
+                            if flags and description:
+                                st.write(f"**Description:** {description}")
+                                st.write("**Feature Flags:**")
+                                for flag in flags:
+                                    st.write(f"- {flag}")
+                            else:
+                                st.warning("No feature flags found for this feature request.")
+                            st.markdown("---")  # Add a separator between feature requests
+            else:
+                st.info("No feature requests found in the filtered data.")
 
             if st.button("Save Changes", type="primary"):
                 st.session_state.filtered_df = edited_df.copy()
