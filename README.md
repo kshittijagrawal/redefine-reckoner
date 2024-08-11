@@ -1,6 +1,6 @@
-# Redefine Ready Reckoner
+# Redefine Reckoner
 
-Welcome to the **Redefine Ready Reckoner** project! This Streamlit application allows users to filter and view feature availability across different checkout types and verticals.
+Welcome to the **Redefine Reckoner** project! This Streamlit application allows users to filter and view feature availability across different checkout types and verticals.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ Welcome to the **Redefine Ready Reckoner** project! This Streamlit application a
 
 ## Introduction
 
-**Redefine Ready Reckoner** is a user-friendly application built with Streamlit that helps users explore and analyze feature availability across different checkout types and verticals. Users can filter data based on checkout type, vertical name, and methods of choice, and view the filtered data with an interactive data editor.
+**Redefine Reckoner** is a user-friendly application built with Streamlit that helps users explore and analyze feature availability across different checkout types and verticals. Users can filter data based on checkout type, vertical name, and methods of choice, and view the filtered data with an interactive data editor.
 
 ## Features
 
@@ -46,7 +46,7 @@ Ensure you have the following software installed on your system:
    First, clone the repository to your local machine using the following command:
 
    ```bash
-   git clone https://github.com/<yourusername>/redefine-ready-reckoner.git
+   git clone https://github.com/<yourusername>/redefine-reckoner.git
    ```
 
    Replace `yourusername` with your GitHub username if you've forked the repository.
@@ -54,7 +54,7 @@ Ensure you have the following software installed on your system:
 2. **Navigate to the Project Directory**
 
    ```bash
-   cd redefine-ready-reckoner
+   cd redefine-reckoner
    ```
 
 3. **Create and Activate a Virtual Environment**
@@ -86,6 +86,12 @@ Ensure you have the following software installed on your system:
 
 1. **Start the Streamlit App**
 
+  Run the following command to configure a SQLite Database and create a table named `features` for the application to pull data from:
+
+   ```bin
+   python3 populate_db.py
+   ```
+
    Run the following command to start the Streamlit application:
 
    ```bin
@@ -94,7 +100,7 @@ Ensure you have the following software installed on your system:
 
 2. **Open Your Web Browser**
 
-   Open your web browser and navigate to http://localhost:8501 to view the application.
+   Open your web browser and navigate to `http://localhost:8501` to view the application.
 
 ## Contributing
 
@@ -111,7 +117,7 @@ Contributions are welcome! Follow the steps below to contribute to this project.
    Clone your forked repository to your local machine:
 
    ```bash
-   git clone https://github.com/<yourusername>/redefine-ready-reckoner.git
+   git clone https://github.com/<yourusername>/redefine-reckoner.git
    ```
 
    Replace `yourusername` with your GitHub username.
@@ -121,7 +127,7 @@ Contributions are welcome! Follow the steps below to contribute to this project.
 1. **Navigate to the Project Directory**
 
    ```bash
-   cd redefine-ready-reckoner
+   cd redefine-reckoner
    ```
 
 2. **Create and Activate a Virtual Environment**
@@ -188,5 +194,3 @@ Contributions are welcome! Follow the steps below to contribute to this project.
 3. **Create a Pull Request**
 
    Go to the original repository on GitHub and click the **_Compare & pull request_** button to submit your changes for review.
-
-## Licence
