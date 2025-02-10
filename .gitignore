@@ -2,5 +2,5 @@ prodEnv/
 Application/data/redefine_reckoner.db
 .DS_Store
 data/
-database/
+# database/
 .streamlit
