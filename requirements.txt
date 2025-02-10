@@ -21,6 +21,7 @@ packaging==24.1
 pandas==2.2.2
 pillow==10.4.0
 protobuf==5.27.3
+psycopg2==2.9.10
 pyarrow==17.0.0
 pydeck==0.9.1
 Pygments==2.18.0
@@ -32,6 +33,7 @@ rich==13.7.1
 rpds-py==0.19.1
 six==1.16.0
 smmap==5.0.1
+SQLAlchemy==2.0.31
 streamlit==1.37.0
 tenacity==8.5.0
 toml==0.10.2
@@ -40,3 +42,4 @@ tornado==6.4.1
 typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
+Werkzeug==3.0.3

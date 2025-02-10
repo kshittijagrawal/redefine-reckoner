@@ -66,7 +66,7 @@ def main():
         st.session_state.show_success = False
 
     # Load full dataset from the database
-    db_path = "data/redefine_reckoner.db"
+    db_path = "database/redefine_reckoner.db"
     full_df = get_data_from_db(db_path, "SELECT * FROM reckoner")
 
     # Load static data from database tables
